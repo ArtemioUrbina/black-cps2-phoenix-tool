@@ -1,6 +1,6 @@
 /*
 * CPS-II patcher for use with CPS-III hardware
-* Artemio Urbina, 2012
+* Artemio Urbina, 2012-2013
 * Based on work by DarkSOft and Razoola
 *
 * The CPS-2 patcher is free software; you can redistribute it and/or modify
@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <string.h>
 
 #define CPS2_CRC_COMP       0x3FFEFE
 #define FILE_50_OFFSET      0x0280A800
@@ -34,6 +35,14 @@
 unsigned char *ProcessCPS2ROMs(const char *romname);
 //void CalculateCRCs(unsigned char *iso, unsigned int type);
 
+void printUsage(char *cmdname)
+{
+	printf("Usage: %s <-sp> [CPS-III Iso] [CPS2 ROM base name]\n", cmdname);
+    printf("\tEx: %s cap-sf3-3.iso mvcj-pnx\n", cmdname);
+    printf("\tWould use the mvcj-pnx.03 -> mvcj-pnx.10 ROMs\n");
+    printf("\n\tThe optional '-sp' generates a stand alone file for SuperBios usage\n");
+}
+
 int main(int argc, char **argv)
 {  
   const char *isoname = NULL, *romname = NULL;
@@ -41,25 +50,35 @@ int main(int argc, char **argv)
   unsigned int leniso = 0, lenread = 0, lenwrt = 0, type = 0, lenname = 0;
   FILE *isofile = NULL, *newiso = NULL;
   unsigned long crc = 0, i = 0;
+  int superbios = 0;
 
-  printf("-= Black CPS-2 Phoenix tool =-\n\t2012 Artemio Urbina\n\tBased on DarkSoft and Razoola's work\n\n");
+  printf("-= Black CPS-2 Phoenix tool =-\n\t2012-2013 Artemio Urbina\n\tBased on DarkSoft and Razoola's work\n\tVersion 1.01\n\n");
   if (argc != 3)
   {
-    printf("Usage: Cps2patch [CPS-III Iso] [CPS2 ROM base name]\n");
-    printf("\tEx: Cps2Patch cap-sf3-3.iso mvcj-pnx\n");
-    printf("\tWould use the mvcj-pnx.03 -> mvcj-pnx.10 ROMs\n");
+		printUsage(argv[0]);
     return 1;
   }
 
-  isoname = argv[1];
-  romname = argv[2];
-
-  isofile = fopen(isoname, "rb");
-  if(!isofile)
-  {
-    printf("ISO file '%s' could not be read\n", isoname);
-    return 1;
+	if(strcmp(argv[1], "-sp") == 0)
+	{
+		superbios = 1;
+		romname = argv[2];
   }
+  else	
+	{
+  	isoname = argv[1];
+  	romname = argv[2];
+	}	
+
+	if(!superbios)
+	{
+	  isofile = fopen(isoname, "rb");
+	  if(!isofile)
+	  {
+	    printf("ISO file '%s' could not be read\n", isoname);
+	    return 1;
+	  }
+	}
 
   // Read CPS2 ROMS
   cps2roms = ProcessCPS2ROMs(romname);
@@ -67,6 +86,43 @@ int main(int argc, char **argv)
   {    
     fclose(isofile);
     return 1;
+  }
+  
+  if(superbios)
+  {
+  	// Save ROM
+	  lenname = strlen(romname);
+	  lenname += 8; 
+	  isoout = (unsigned char *)malloc(lenname); 
+	  if(!isoout)
+	  {
+	    printf("Could not allocate string\n");	    
+	    free(cps2roms);
+	    return 1;
+	  }  
+  	sprintf(isoout, "%s-SB.bin", romname);
+	  newiso = fopen(isoout ,"wb");
+	  if(!newiso)
+	  {
+	    printf("Could not write ROM\n");	    
+	    free(cps2roms);
+	    free(isoout);
+	    return 1;
+	  }
+	
+	  lenwrt = fwrite(cps2roms, 1, 0x400000, newiso);
+	  if(lenwrt != 0x400000)
+	  {
+	    printf("Could not write ROM\n");	    
+	    free(cps2roms);
+	    free(isoout);
+	    return 1;
+	  }
+	
+	  fclose(newiso);  	  
+	  printf("* ROM saved correctly as '%s'.\n", isoout);
+  	free(isoout);
+  	return 1;
   }
 
   // Read game title from ISO
