@@ -55,30 +55,30 @@ int main(int argc, char **argv)
   printf("-= Black CPS-2 Phoenix tool =-\n\t2012-2013 Artemio Urbina\n\tBased on DarkSoft and Razoola's work\n\tVersion 1.01\n\n");
   if (argc != 3)
   {
-		printUsage(argv[0]);
+	printUsage(argv[0]);
     return 1;
   }
 
-	if(strcmp(argv[1], "-sp") == 0)
-	{
-		superbios = 1;
-		romname = argv[2];
+  if(strcmp(argv[1], "-sp") == 0)
+  {
+	superbios = 1;
+	romname = argv[2];
   }
   else	
-	{
+  {
   	isoname = argv[1];
   	romname = argv[2];
-	}	
+  }	
 
-	if(!superbios)
-	{
-	  isofile = fopen(isoname, "rb");
-	  if(!isofile)
-	  {
-	    printf("ISO file '%s' could not be read\n", isoname);
-	    return 1;
-	  }
-	}
+  if(!superbios)
+  {
+    isofile = fopen(isoname, "rb");
+    if(!isofile)
+    {
+	  printf("ISO file '%s' could not be read\n", isoname);
+	  return 1;
+    }
+  }
 
   // Read CPS2 ROMS
   cps2roms = ProcessCPS2ROMs(romname);
@@ -91,36 +91,36 @@ int main(int argc, char **argv)
   if(superbios)
   {
   	// Save ROM
-	  lenname = strlen(romname);
-	  lenname += 8; 
-	  isoout = (unsigned char *)malloc(lenname); 
-	  if(!isoout)
-	  {
-	    printf("Could not allocate string\n");	    
-	    free(cps2roms);
-	    return 1;
-	  }  
+	lenname = strlen(romname);
+	lenname += 8; 
+	isoout = (unsigned char *)malloc(lenname); 
+	if(!isoout)
+	{
+	  printf("Could not allocate string\n");	    
+	  free(cps2roms);
+	  return 1;
+	}  
   	sprintf(isoout, "%s-SB.bin", romname);
-	  newiso = fopen(isoout ,"wb");
-	  if(!newiso)
-	  {
-	    printf("Could not write ROM\n");	    
-	    free(cps2roms);
-	    free(isoout);
-	    return 1;
-	  }
+	newiso = fopen(isoout ,"wb");
+	if(!newiso)
+	{
+	  printf("Could not write ROM\n");	    
+	  free(cps2roms);
+	  free(isoout);
+	  return 1;
+	}
 	
-	  lenwrt = fwrite(cps2roms, 1, 0x400000, newiso);
-	  if(lenwrt != 0x400000)
-	  {
-	    printf("Could not write ROM\n");	    
-	    free(cps2roms);
-	    free(isoout);
-	    return 1;
-	  }
+	lenwrt = fwrite(cps2roms, 1, 0x400000, newiso);
+	if(lenwrt != 0x400000)
+	{
+	  printf("Could not write ROM\n");	    
+	  free(cps2roms);
+	  free(isoout);
+	  return 1;
+	}
 	
-	  fclose(newiso);  	  
-	  printf("* ROM saved correctly as '%s'.\n", isoout);
+	fclose(newiso);  	  
+	printf("* ROM saved correctly as '%s'.\n", isoout);
   	free(isoout);
   	return 1;
   }
