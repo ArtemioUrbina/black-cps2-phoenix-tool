@@ -37,10 +37,10 @@ unsigned char *ProcessCPS2ROMs(const char *romname);
 
 void printUsage(char *cmdname)
 {
-	printf("Usage: %s <-sp> [CPS-III Iso] [CPS2 ROM base name]\n", cmdname);
-    printf("\tEx: %s cap-sf3-3.iso mvcj-pnx\n", cmdname);
-    printf("\tWould use the mvcj-pnx.03 -> mvcj-pnx.10 ROMs\n");
-    printf("\n\tThe optional '-sp' generates a stand alone file for SuperBios usage\n");
+	printf("Usage: %s <-sp> <CPS-III Iso> [CPS2 ROM base name]\n", cmdname);
+    printf("\tEx: %s cap-sf3-3.iso mvcj-pnx (For injecting an ISO)\n", cmdname);
+    printf("\tEx: %s -sp mvcj-pnx (For creating Superbios file)\n", cmdname);
+    printf("\tBoth would use the mvcj-pnx.03 -> mvcj-pnx.10 ROMs\n");    
 }
 
 int main(int argc, char **argv)
